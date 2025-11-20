@@ -17,13 +17,13 @@
         <div class="avatar">VS</div>
         <div>
           <h1 class="title">Video Saver</h1>
-          <p class="subtitle">Tempel URL video publik lalu klik Gas. Tidak perlu login.</p>
+          <p class="subtitle">Tempel link video → klik Gas → muncul download.</p>
         </div>
       </div>
     </header>
 
     <section class="card">
-      <label class="input-label">Masukin link videonya</label>
+      <label class="input-label">Masukkan URL video</label>
       <div class="input-row">
         <input id="urlInput" type="url" placeholder="https://vt.tiktok.com/xxxx/">
       </div>
@@ -33,21 +33,11 @@
         <button id="clearBtn" class="btn btn-ghost">Hapus</button>
       </div>
 
-      <!-- STATUS -->
       <div id="statusBox" class="status hidden"></div>
 
-      <!-- VIDEO PREVIEW -->
-      <div id="playerBox" class="player-box hidden">
-        <div class="player-header">
-          <span>Video ditemukan</span>
-          <button id="openBtn" class="btn-open">Open / Download</button>
-        </div>
-        <video id="previewVideo" controls playsinline></video>
-      </div>
-
-      <!-- THUMBNAIL PREVIEW (opsional) -->
+      <!-- THUMBNAIL PREVIEW -->
       <div id="thumbBox" class="thumb-box hidden">
-        <img id="thumbImg" src="" alt="Thumbnail video">
+        <img id="thumbImg" src="" alt="Thumbnail">
       </div>
 
       <!-- HASIL DOWNLOAD -->
@@ -57,6 +47,7 @@
       </div>
 
     </section>
+
   </main>
 
   <script src="script.js"></script>
