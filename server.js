@@ -3,22 +3,15 @@ const fetch = require("node-fetch");
 const bodyParser = require("body-parser");
 const path = require("path");
 const url = require("url");
-const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// PostgreSQL Pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false
-});
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ========= Generate filename otomatis =========
+// Generate nama file otomatis
 function generateFileName(originalName, contentType) {
   let ext = "";
   if (originalName && originalName.includes(".")) {
@@ -29,14 +22,54 @@ function generateFileName(originalName, contentType) {
     else if (contentType.includes("ogg")) ext = ".ogg";
     else if (contentType.includes("mkv")) ext = ".mkv";
     else ext = ".bin";
+  } else {
+    ext = ".bin";
   }
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   return `video-${stamp}${ext}`;
 }
 
-// ========= Logging ke database =========
-async function logDownloadToDB({ ip, videoUrl, filename, userAgent, status }) {
+// Halaman utama
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Endpoint download
+app.post("/download", async (req, res) => {
   try {
-    await pool.query(
-      `
-      INSERT INTO downloads (ip, video_url, filename, user
+    const videoUrl = req.body.videoUrl;
+    if (!videoUrl) return res.status(400).send("videoUrl is required");
+
+    let parsed;
+    try {
+      parsed = new url.URL(videoUrl);
+    } catch {
+      return res.status(400).send("URL tidak valid.");
+    }
+
+    // Hanya allow http/https
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      return res.status(400).send("Protocol URL tidak didukung.");
+    }
+
+    const response = await fetch(videoUrl);
+    if (!response.ok) {
+      return res.status(400).send("Gagal mengakses URL. Pastikan URL bisa diakses publik.");
+    }
+
+    const contentType = response.headers.get("content-type") || "application/octet-stream";
+    const filename = generateFileName(parsed.pathname.split("/").pop(), contentType);
+
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", contentType);
+
+    response.body.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Terjadi error di server.");
+  }
+});
+
+app.listen(PORT, () => {
+  console.log("Server jalan di port " + PORT);
+});
