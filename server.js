@@ -7,11 +7,9 @@ const url = require("url");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Generate nama file otomatis
 function generateFileName(originalName, contentType) {
   let ext = "";
   if (originalName && originalName.includes(".")) {
@@ -29,12 +27,10 @@ function generateFileName(originalName, contentType) {
   return `video-${stamp}${ext}`;
 }
 
-// Halaman utama
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Endpoint download
 app.post("/download", async (req, res) => {
   try {
     const videoUrl = req.body.videoUrl;
@@ -47,14 +43,13 @@ app.post("/download", async (req, res) => {
       return res.status(400).send("URL tidak valid.");
     }
 
-    // Hanya allow http/https
     if (!["http:", "https:"].includes(parsed.protocol)) {
       return res.status(400).send("Protocol URL tidak didukung.");
     }
 
     const response = await fetch(videoUrl);
     if (!response.ok) {
-      return res.status(400).send("Gagal mengakses URL. Pastikan URL bisa diakses publik.");
+      return res.status(400).send("Gagal mengakses URL.");
     }
 
     const contentType = response.headers.get("content-type") || "application/octet-stream";
@@ -66,7 +61,7 @@ app.post("/download", async (req, res) => {
     response.body.pipe(res);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Terjadi error di server.");
+    res.status(500).send("Server error.");
   }
 });
 
