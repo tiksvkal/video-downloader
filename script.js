@@ -31,7 +31,7 @@ function clearResult() {
 // =======================
 async function fetchDownloadInfo(videoUrl) {
   const apiUrl =
-    "https://www.tikwm.com/api/" +
+    "https://dl.siputzx.my.id" +
     encodeURIComponent(videoUrl) +
     "&hd=1";
 
