@@ -31,7 +31,7 @@ function clearResult() {
 // =======================
 async function fetchDownloadInfo(videoUrl) {
   const apiUrl =
-    "https://api.douyin.wtf" +
+    "https://api.douyin.wtf/api?url" +
     encodeURIComponent(videoUrl) +
     "&hd=1";
 
