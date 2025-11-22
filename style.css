@@ -267,3 +267,49 @@ body::before {
   60% { opacity: 0.5; transform: scale(1.01) rotate(2deg); }
   100% { opacity: 0; transform: scale(1) rotate(0deg); }
 }
+/* BACKGROUND FLOAT / GERAK PELAN */
+@keyframes bgFloat {
+  0%   { background-position: center top; }
+  50%  { background-position: center 5%; }
+  100% { background-position: center top; }
+}
+
+body {
+  animation: bgFloat 18s ease-in-out infinite;
+}
+/* CINEMATIC ZOOM */
+@keyframes bgZoom {
+  0%   { background-size: 100%; }
+  50%  { background-size: 108%; }
+  100% { background-size: 100%; }
+}
+
+body {
+  animation: bgZoom 22s ease-in-out infinite;
+}
+/* GERAK + ZOOM */
+@keyframes bgMove {
+  0%   { background-position: center top; background-size: 100%; }
+  50%  { background-position: center 4%; background-size: 108%; }
+  100% { background-position: center top; background-size: 100%; }
+}
+
+body {
+  animation: bgMove 20s ease-in-out infinite;
+}
+.bg-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(120,180,255,0.6), transparent 70%);
+  mix-blend-mode: screen;
+  animation: flashAnim 2.2s infinite;
+  opacity: 0;
+}
+
+@keyframes flashAnim {
+  0%, 100% { opacity: 0; }
+  45% { opacity: .25; }
+  50% { opacity: .65; }
+  55% { opacity: .25; }
+}
