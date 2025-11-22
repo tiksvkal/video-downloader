@@ -334,6 +334,64 @@ function renderResult(payload) {
   }
 
   // If playable -> show video player (use poster if available)
+
+function renderResult(payload) {
+  // normalize wrapper
+  if (payload && payload.ok && payload.result) payload = payload.result;
+
+  const title = payload.title || payload.name || payload.desc || (payload.data && payload.data.title) || "";
+  const thumbnail = pickThumbnail(payload);
+
+  // collect downloads (video)
+  const downloads = [];
+  if (Array.isArray(payload.downloads) && payload.downloads.length) {
+    payload.downloads.forEach(d => {
+      downloads.push({
+        label: d.label || d.quality || d.name || "Video",
+        url: d.url || d.link || d.src || d,
+        size: d.size || d.filesize || "",
+        filename: d.filename || ""
+      });
+    });
+  }
+  if (!downloads.length) {
+    if (payload.play) downloads.push({ label: "Tanpa Watermark", url: payload.play, size: payload.size || "" });
+    if (payload.wmplay) downloads.push({ label: "Dengan Watermark", url: payload.wmplay, size: payload.size || "" });
+    if (payload.video && payload.video.play_addr) downloads.push({ label: "Play", url: payload.video.play_addr });
+  }
+  if (!downloads.length) {
+    const urls = Array.from(collectUrls(payload));
+    const preferred = urls.filter(u => /\.mp4(\?|$)/i.test(u) || /\/play\/|\/video\//i.test(u) || /play/i.test(u));
+    const uniq = Array.from(new Set(preferred.length ? preferred : urls));
+    uniq.forEach((u, i) => downloads.push({ label: `Detected ${i+1}`, url: u, size: "" }));
+  }
+
+  // collect images/audio for extra buttons
+  const allUrls = Array.from(collectUrls(payload));
+  const imageUrls = allUrls.filter(u => /\.(jpe?g|png|webp|gif)(\?|$)/i.test(u));
+  const audioUrls = allUrls.filter(u => /\.(mp3|m4a|aac|ogg|wav)(\?|$)/i.test(u) || /audio/i.test(u));
+  const audioUrl = audioUrls.length ? audioUrls[0] : null;
+  const photoUrl = thumbnail || (imageUrls.length ? imageUrls[0] : null);
+
+  // clear UI
+  resultList.innerHTML = "";
+  if (playerBox) playerBox.classList.add("hidden");
+  if (thumbBox) thumbBox.classList.add("hidden");
+
+  // pick playable (mp4/play-like)
+  let playableUrl = null;
+  for (const d of downloads) {
+    if (d.url && ( /\.mp4(\?|$)/i.test(d.url) || /\/play\/|\/video\//i.test(d.url) )) {
+      playableUrl = d.url;
+      break;
+    }
+  }
+  if (!playableUrl && downloads.length) {
+    const firstCandidate = downloads.find(d => typeof d.url === "string" && /^https?:\/\//i.test(d.url));
+    if (firstCandidate) playableUrl = firstCandidate.url;
+  }
+
+  // If playable -> show video player (use poster if available)
   if (playableUrl && previewVideo && playerBox) {
     try { previewVideo.crossOrigin = "anonymous"; } catch(e){}
     previewVideo.src = playableUrl;
@@ -369,23 +427,22 @@ function renderResult(payload) {
 
   // Render only "Open" button for each detected download (if you still want Open),
   // but DO NOT render per-video Download button (we'll provide global Foto/Audio downloads instead).
-  // tombol DOWNLOAD VIDEO langsung
-// tombol OPEN (yang lama)
-downloads.forEach(d => {
-  const node = document.createElement("div");
-  node.className = "result-item";
-  node.innerHTML = `
-    <div style="display:flex;flex-direction:column;margin-bottom:8px;">
-      <div style="font-weight:600">${d.label}</div>
-      <div style="opacity:.75;font-size:13px">${d.size || ""}</div>
-    </div>
+  downloads.forEach(d => {
+    const node = document.createElement("div");
+    node.className = "result-item";
+    node.innerHTML = `
+      <div style="display:flex;flex-direction:column;margin-bottom:8px;">
+        <div style="font-weight:600">${d.label}</div>
+        <div style="opacity:.75;font-size:13px">${d.size || ""}</div>
+      </div>
 
-    <div class="download-actions">
-      <a href="${d.url}" target="_blank" class="open-btn">Open</a>
-    </div>
-  `;
-  resultList.appendChild(node);
-});
+      <div class="download-actions">
+        <a href="${d.url}" target="_blank" class="open-btn">Open</a>
+      </div>
+    `;
+    resultList.appendChild(node);
+  });
+
   // === HERE: add single row with Download Foto + Download Audio (if available) ===
   const extras = document.createElement("div");
   extras.className = "result-item";
