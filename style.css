@@ -175,16 +175,19 @@ body {
 }
 
 .download-item button {
-  padding: 8px 12px;
-  background: #3c84ff;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
+    padding: 10px 22px;
+    background: #237DFF;    /* warna biru terang seperti tombol Gas */
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease;
 }
 
 .download-item button:hover {
-  background: #1d6ae5;
+    background: #1A63CC;   /* sedikit lebih gelap */
 }
 
 /* ---- ABOUT ---- */
